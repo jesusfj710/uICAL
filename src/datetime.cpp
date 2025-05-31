@@ -47,10 +47,10 @@ namespace uICAL {
             int m = atoi(datetime.substr(4,2).c_str());
             int d = atoi(datetime.substr(6,2).c_str());
 
-            DateStamp ds(y, m, d, 0, 0, 0);        // midnight
-            this->tz = TZ::unaware();              // date-only → “floating”
-            this->construct(ds, this->tz);         // reuse existing helper
-            return;                                // done
+            DateStamp ds(y, m, d, 0, 0, 0);          // midnight
+            TZ_ptr tzUTC = new_ptr<TZ>("Z");         // make it *aware* in UTC
+            this->construct(ds, tzUTC);
+            return;
         }
         /* ─── existing length check for DATE-TIME stays as-is ─── */
         if (datetime.length() < 15)
