@@ -40,6 +40,19 @@ namespace uICAL {
     }
 
     void DateTime::construct(const string& datetime, const TZMap_ptr& tzmap) {
+        /* ───── NEW: accept all-day DATEs ───── */
+        if (datetime.length() == 8 && std::isdigit(datetime[0])) {
+            // yyyy mm dd → ints
+            int y = atoi(datetime.substr(0,4).c_str());
+            int m = atoi(datetime.substr(4,2).c_str());
+            int d = atoi(datetime.substr(6,2).c_str());
+
+            DateStamp ds(y, m, d, 0, 0, 0);        // midnight
+            this->tz = TZ::unaware();              // date-only → “floating”
+            this->construct(ds, this->tz);         // reuse existing helper
+            return;                                // done
+        }
+        /* ─── existing length check for DATE-TIME stays as-is ─── */
         if (datetime.length() < 15)
             throw ValueError(string("Bad datetime: \"") + datetime + "\"");
 
@@ -47,8 +60,7 @@ namespace uICAL {
 
         if (datetime.length() > 15) {
             this->tz = new_ptr<TZ>(datetime.substr(15), tzmap);
-        }
-        else {
+        } else {
             this->tz = TZ::unaware();
         }
 
