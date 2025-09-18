@@ -18,8 +18,23 @@ namespace uICAL {
         VLine_ptr rRule = obj->getPropertyByName("RRULE");
         VLine_ptr summary = obj->getPropertyByName("SUMMARY");
 
-        this->start = DateTime(dtStart->value + dtStart->getParam("TZID"), tzmap);
-        this->end = DateTime(dtEnd->value + dtStart->getParam("TZID"), tzmap);
+        string dtStartValue = dtStart->value;
+        if (dtStart->getParam("VALUE") == "DATE") {
+            dtStartValue += "T000000";
+        }
+        string dtStartTz = dtStart->getParam("TZID");
+
+        string dtEndValue = dtEnd->value;
+        if (dtEnd->getParam("VALUE") == "DATE") {
+            dtEndValue += "T000000";
+        }
+        string dtEndTz = dtEnd->getParam("TZID");
+        if (dtEndTz.empty()) {
+            dtEndTz = dtStartTz;
+        }
+
+        this->start = DateTime(dtStartValue + dtStartTz, tzmap);
+        this->end = DateTime(dtEndValue + dtEndTz, tzmap);
 
         this->summary = summary->value;
 
