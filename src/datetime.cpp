@@ -41,30 +41,29 @@ namespace uICAL {
 
     void DateTime::construct(const string& datetime, const TZMap_ptr& tzmap) {
         /* ───── NEW: accept all-day DATEs ───── */
-        if (datetime.length() == 8 && std::isdigit(datetime[0])) {
+        if (datetime.length() == 8) {
             // yyyy mm dd → ints
-            int y = atoi(datetime.substr(0,4).c_str());
-            int m = atoi(datetime.substr(4,2).c_str());
-            int d = atoi(datetime.substr(6,2).c_str());
+            int y = atoi(datetime.substr(0, 4).c_str());
+            int m = atoi(datetime.substr(4, 2).c_str());
+            int d = atoi(datetime.substr(6, 2).c_str());
 
-            DateStamp ds(y, m, d, 0, 0, 0);          // midnight
-            TZ_ptr tzUTC = new_ptr<TZ>("Z");         // make it *aware* in UTC
-            this->construct(ds, tzUTC);
-            return;
-        }
-        /* ─── existing length check for DATE-TIME stays as-is ─── */
-        if (datetime.length() < 15)
-            throw ValueError(string("Bad datetime: \"") + datetime + "\"");
-
-        DateStamp ds(datetime.substr(0, 15));
-
-        if (datetime.length() > 15) {
-            this->tz = new_ptr<TZ>(datetime.substr(15), tzmap);
+            DateStamp ds(datetime.substr(0, 8) + "T000000"); // midnight
+            this->tz = new_ptr<TZ>("Z", tzmap);
+            this->construct(ds, tz);
         } else {
-            this->tz = TZ::unaware();
-        }
+            if (datetime.length() < 15)
+                throw ValueError(string("Bad datetime: \"") + datetime + "\"");
 
-        this->construct(ds, tz);
+            DateStamp ds(datetime.substr(0, 15));
+
+            if (datetime.length() > 15) {
+                this->tz = new_ptr<TZ>(datetime.substr(15), tzmap);
+            } else {
+                this->tz = TZ::unaware();
+            }
+
+            this->construct(ds, tz);
+        }
     }
 
     void DateTime::construct(const DateStamp& ds, const TZ_ptr& tz) {
