@@ -40,8 +40,25 @@ namespace uICAL {
     }
 
     void DateTime::construct(const string& datetime, const TZMap_ptr& tzmap) {
-        if (datetime.length() < 15)
-            throw ValueError(string("Bad datetime: \"") + datetime + "\"");
+        const bool hasTime = datetime.length() >= 15 && datetime.substr(8, 1) == "T";
+
+        if (!hasTime) {
+            if (datetime.length() < 8 || datetime.find('T') != string::npos) {
+                throw ValueError(string("Bad datetime: \"") + datetime + "\"");
+            }
+
+            DateStamp ds(datetime.substr(0, 8) + "T000000");
+
+            if (datetime.length() > 8) {
+                this->tz = new_ptr<TZ>(datetime.substr(8), tzmap);
+            }
+            else {
+                this->tz = TZ::unaware();
+            }
+
+            this->construct(ds, tz);
+            return;
+        }
 
         DateStamp ds(datetime.substr(0, 15));
 
