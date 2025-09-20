@@ -43,7 +43,7 @@ namespace uICAL {
         const bool hasTime = datetime.length() >= 15 && datetime.substr(8, 1) == "T";
 
         if (!hasTime) {
-            if (datetime.length() < 8 || datetime.find('T') != string::npos) {
+            if (datetime.length() < 8 || datetime.find("T") != string::npos) {
                 throw ValueError(string("Bad datetime: \"") + datetime + "\"");
             }
 
